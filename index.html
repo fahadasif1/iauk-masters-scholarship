@@ -965,7 +965,7 @@ input[type=text], input[type=tel], input[type=email], select, .event-opt .box { 
       document.getElementById("form-wrap").hidden = true;
       var first = data.full_name.split(/\s+/)[0];
       document.getElementById("success-msg").textContent =
-        "Thank you, " + first + ". We have your request for " + e.city + " on " + e.longDate + ". Our team will review your profile and send your ticket to " + data.email + " or by SMS to " + data.phone + ".";
+        "Thank you, " + first + ". We have your request for " + e.city + " on " + e.longDate + ". Our team will contact you for more details and then review your profile. If you are shortlisted, we will send your ticket to " + data.email + ". Photo ID is compulsory: you must bring original photo ID together with your ticket.";
       document.getElementById("success-ref").textContent = ref;
       document.getElementById("cal-link").href = calUrl(e);
       var s = document.getElementById("success"); s.hidden = false;
