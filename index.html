@@ -209,7 +209,7 @@ form { padding: 24px 28px 28px; display: grid; grid-template-columns: repeat(2, 
 .field.full { grid-column: 1 / -1; }
 label, .legend { font-family: var(--display); font-weight: 600; font-size: 0.9rem; }
 .req { color: var(--red); }
-input[type=text], input[type=tel], input[type=email], select { width: 100%; font: inherit; font-size: 1rem; color: var(--ink); background: var(--paper); border: 1.5px solid var(--line); border-radius: 10px; padding: 13px 14px; min-height: 50px; transition: border-color .15s; }
+input[type=text], input[type=tel], input[type=email], input[type=date], select { width: 100%; font: inherit; font-size: 1rem; color: var(--ink); background: var(--paper); border: 1.5px solid var(--line); border-radius: 10px; padding: 13px 14px; min-height: 50px; transition: border-color .15s; }
 select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
 input:hover, select:hover { border-color: var(--line-strong); }
 input:focus, select:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--focus); }
@@ -405,6 +405,7 @@ input[type=text], input[type=tel], input[type=email], select, .event-opt .box { 
 .strip-note { color: var(--accent); }
 .stat b { font-weight: 700; color: var(--red); font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.02em; }
 
+input[type=date] { -webkit-appearance: none; appearance: none; text-align: left; display: block; }
 </style>
 
 </head>
@@ -648,6 +649,11 @@ input[type=text], input[type=tel], input[type=email], select, .event-opt .box { 
                 <option>Other</option>
               </select>
               <p class="err" id="e-visa"></p>
+            </div>
+            <div class="field">
+              <label for="f-visaexp">Visa expiry date <span class="req">*</span></label>
+              <input id="f-visaexp" name="visa_expiry" type="date" required>
+              <p class="err" id="e-visaexp"></p>
             </div>
             <fieldset class="field full" id="f-event-set">
               <legend class="legend">Event <span class="req">*</span></legend>
@@ -898,6 +904,13 @@ input[type=text], input[type=tel], input[type=email], select, .event-opt .box { 
     email: { el: "f-email", test: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }, msg: "Enter a valid email address, for example name@gmail.com." },
     postcode: { el: "f-postcode", test: function (v) { return /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(v.trim()); }, msg: "Enter a full UK postcode, for example M19 3WN." },
     visa: { el: "f-visa", test: function (v) { return !!v; }, msg: "Choose your visa status." },
+    visaexp: { el: "f-visaexp", test: function (v) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+      var p = v.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]);
+      if (d.getFullYear() !== +p[0] || d.getMonth() !== +p[1] - 1 || d.getDate() !== +p[2]) return false;
+      var t = new Date(); t = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+      return d >= t && p[0] <= t.getFullYear() + 15;
+    }, msg: "Enter your visa expiry date (today or later), for example 31/12/2027." },
     source: { el: "f-source", test: function (v) { return !!v; }, msg: "Tell us how you heard about the event." }
   };
   function setErr(key, msg) {
@@ -947,6 +960,7 @@ input[type=text], input[type=tel], input[type=email], select, .event-opt .box { 
       postcode: document.getElementById("f-postcode").value.trim().toUpperCase(),
       event: e.city + " – " + e.longDate,
       visa_status: document.getElementById("f-visa").value,
+      visa_expiry: document.getElementById("f-visaexp").value,
       source: document.getElementById("f-source").value,
       consent: "yes",
       marketing_opt_in: document.getElementById("f-marketing").checked ? "yes" : "no",
