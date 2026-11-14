@@ -677,7 +677,7 @@ input[type=date] { -webkit-appearance: none; appearance: none; text-align: left;
               <p class="err" id="e-source"></p>
             </div>
             <div class="field full">
-              <label class="check" for="f-consent"><input id="f-consent" name="consent" type="checkbox" required><span>I agree that IAUK can use my details to review my seat request and contact me about this event, as set out in the <a href="https://immigrationadvisers.com/privacy-policy/" target="_blank" rel="noopener">privacy policy</a>, and I accept the <a href="#terms">draw terms</a>. <span class="req">*</span></span></label>
+              <label class="check" for="f-consent"><input id="f-consent" name="consent" type="checkbox" required><span>I agree that IAUK can use my details to review my seat request and contact me about this event, as set out in the <a href="https://immigrationadvisers.com/privacy-policy/" target="_blank" rel="noopener">privacy policy</a>, and I accept the <a href="#terms">draw terms</a>. We also record your IP address when you submit this form, to help prevent duplicate and fraudulent requests. <span class="req">*</span></span></label>
               <p class="err" id="e-consent"></p>
             </div>
             <div class="field full">
@@ -995,8 +995,16 @@ input[type=date] { -webkit-appearance: none; appearance: none; text-align: left;
     };
 
     if (!SHEET_ENDPOINT) { setTimeout(done, 500); return; }
-    fetch(SHEET_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(data) })
-      .then(done).catch(fail);
+    var sent = false;
+    var post = function (ip) {
+      if (sent) return; sent = true; data.ip = ip || "";
+      fetch(SHEET_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(data) })
+        .then(done).catch(fail);
+    };
+    var ipTimer = setTimeout(function () { post(""); }, 2500);
+    fetch("https://www.cloudflare.com/cdn-cgi/trace").then(function (r) { return r.text(); })
+      .then(function (t) { clearTimeout(ipTimer); var m = /^ip=(.+)$/m.exec(t); post(m ? m[1].trim() : ""); })
+      .catch(function () { clearTimeout(ipTimer); post(""); });
   });
 
   document.getElementById("again-btn").addEventListener("click", function () {
